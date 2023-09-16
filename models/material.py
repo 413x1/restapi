@@ -30,7 +30,7 @@ class Material(models.Model):
         if not vals.get('code') or not vals.get('name') or not vals.get('type') \
                 or not vals.get('buy_price') or not vals.get('supplier_id'):
             raise exceptions.ValidationError("All fields (code, name, type, buy_price, supplier_id) are required.")
-        
+
         if vals.get('type') not in dict(self.type_choices):
             raise exceptions.ValidationError("Invalid field type value")
 
@@ -40,14 +40,14 @@ class Material(models.Model):
         supplier_id = vals.get('supplier_id')
         if not self.env['restapi.suppliers'].sudo().search([('id', '=', supplier_id)]):
             raise exceptions.ValidationError("Invalid 'supplier_id'.")
-        
+
     def validate_material_update_data(self, vals):
         if 'code' in vals and not vals['code']:
             raise exceptions.ValidationError("Field 'code' cannot be empty.")
-        
+
         if 'name' in vals and not vals['name']:
             raise exceptions.ValidationError("Field 'name' cannot be empty.")
-        
+
         if vals.get('type') not in dict(self.type_choices):
             raise exceptions.ValidationError("Invalid field type value")
 
@@ -56,12 +56,12 @@ class Material(models.Model):
 
         if 'supplier_id' in vals and not self.env['restapi.suppliers'].browse(vals['supplier_id']):
             raise exceptions.ValidationError("Invalid 'supplier_id'.")
-    
+
     @api.model
     def create_material(self, vals):
         self.validate_material_data(vals)
         return self.create(vals)
-    
+
     @api.model
     def partial_update_material(self, material_id, vals):
         self.validate_material_update_data(vals)
@@ -74,7 +74,7 @@ class Material(models.Model):
 
     def read(self, material_id):
         return self.browse(material_id)
-    
+
     def show(self, material_id):
         return self.search([('id', '=', material_id)], limit=1)
 
