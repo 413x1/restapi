@@ -7,13 +7,12 @@ class Material(models.Model):
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'item duplicate') 
     ]
+    type_choices = [('fabric', 'Fabric'), ('jeans', 'Jeans'), ('cotton', 'Cotton')]
 
     code = fields.Char('Material Code', required=True)
     name = fields.Char('Material Name', required=True)
     type = fields.Selection(
-        selection=[
-            ('fabric', 'Fabric'), ('jeans', 'Jeans'), ('cotton', 'Cotton')
-        ],
+        selection=type_choices,
         default='fabric'
     )
     buy_price = fields.Float(
@@ -31,6 +30,9 @@ class Material(models.Model):
         if not vals.get('code') or not vals.get('name') or not vals.get('type') \
                 or not vals.get('buy_price') or not vals.get('supplier_id'):
             raise exceptions.ValidationError("All fields (code, name, type, buy_price, supplier_id) are required.")
+        
+        if vals.get('type') not in dict(self.type_choices):
+            raise exceptions.ValidationError("Invalid field type value")
 
         if vals.get('buy_price') <= 100:
             raise exceptions.ValidationError("The 'buy_price' must be greater than 100.")
@@ -45,6 +47,9 @@ class Material(models.Model):
         
         if 'name' in vals and not vals['name']:
             raise exceptions.ValidationError("Field 'name' cannot be empty.")
+        
+        if vals.get('type') not in dict(self.type_choices):
+            raise exceptions.ValidationError("Invalid field type value")
 
         if 'buy_price' in vals and vals['buy_price'] <= 100:
             raise exceptions.ValidationError("The 'buy_price' must be greater than 100.")

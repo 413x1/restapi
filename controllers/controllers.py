@@ -44,7 +44,11 @@ class Supplier(http.Controller):
 class Material(http.Controller):
     @http.route('/restapi/materials/', type='json', auth="none", method=['GET'])
     def list_materials(self, **kw):
-        materials = request.env['restapi.materials'].sudo().search([])
+        search_query = []
+        if kw.get('type', None):
+            search_query.append(('type', '=', kw.pop('type')))
+
+        materials = request.env['restapi.materials'].sudo().search(search_query)
         material_data = []
         for material in materials:
             material_data.append({
@@ -53,9 +57,9 @@ class Material(http.Controller):
                 'name': material.name,
                 'type': material.type,
                 'buy_price': material.buy_price,
-                'supplier_id': material.supplier_id.id if material.supplier_id else None,
+                'supplier_id': material.supplier_id.id,
             })
-        
+
         if not material_data:
             return {}
 
@@ -65,7 +69,7 @@ class Material(http.Controller):
     def create_material(self, **kw):
         try:
             material_data = json.loads(request.httprequest.data)
-            new_material = request.env['restapi.materials'].sudo().validate_material_data(material_data).create_material(material_data)
+            new_material = request.env['restapi.materials'].sudo().create_material(material_data)
             response_data = {'id': new_material.id, 'message': 'Material created successfully'}
             
             return response_data
